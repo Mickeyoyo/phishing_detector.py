@@ -1,22 +1,33 @@
-### AL ###
-#Template for AL projects for Dynamics 365 Business Central
-#launch.json folder
-.vscode/
-#Cache folder
-.alcache/
-#Symbols folder
-.alpackages/
-#Snapshots folder
-.snapshots/
-#Testing Output folder
-.output/
-#Extension App-file
-*.app
-#Rapid Application Development File
-rad.json
-#Translation Base-file
-*.g.xlf
-#License-file
-*.flf
-#Test results file
-TestResults.xml
+import streamlit as st
+
+st.title("AI-Powered Phishing Email Detector (Keyword Based)")
+email_content = st.text_area("Paste the email content here:")
+
+if st.button("Check Email"):
+        keywords_with_scores = {
+            "urgent action required": 5,
+            "verify account": 4,
+            "security alert": 3,
+            "dear customer": 1,
+            "prize": 4,
+            "click here": 2,
+            # Add more keywords and their scores
+        }
+        email_content_lower = email_content.lower()
+        total_score = 0
+        found_keywords = []
+        phishing_threshold = 5 # Set a threshold for phishing detection
+        
+        for keyword, score in keywords_with_scores.items():
+            if keyword in email_content_lower:
+                total_score += score
+                found_keywords.append(keyword)
+
+        if total_score >= phishing_threshold:
+            st.error("⚠️ This email looks like phishing!")
+            st.write("Suspicious keywords found:", ", ".join(found_keywords))
+            st.write("Total suspicious score:", total_score)
+        else:
+            st.success("✅ This email looks safe (based on keyword analysis).")
+            if found_keywords:
+                st.write("Note: Some common keywords were found:", ", ".join(found_keywords), ". This doesn't necessarily mean it's phishing.")
