@@ -1,3 +1,4 @@
+
 import streamlit as st
 
 st.title("AI-Powered Phishing Email Detector (Keyword Based)")
@@ -27,13 +28,12 @@ if st.button("Check Email"):
             "review the document": 1, # Very common, low score
             "exclusive offer": 1,
             "free gift": 3,
-            "limited time only": 2
+            "limited time only": 2,
             "verify account": 4,
             "security alert": 3,
             "dear customer": 1,
             "prize": 4,
-            "click here": 2,
-            # Add more keywords and their scores
+            "click here": 2, # Add more keywords and their scores
         }
         email_content_lower = email_content.lower()
         total_score = 0
