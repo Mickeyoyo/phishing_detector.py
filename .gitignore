@@ -6,6 +6,28 @@ email_content = st.text_area("Paste the email content here:")
 if st.button("Check Email"):
         keywords_with_scores = {
             "urgent action required": 5,
+            "your account will be suspended": 5,
+            "immediate response needed": 4,
+            "act now": 3,
+            "verify your identity": 4,
+            "security alert": 3,
+            "account compromised": 5,
+            "unauthorized login attempt": 4,
+            "you have won": 5,
+            "claim your prize": 4,
+            "refund available": 3,
+            "invoice attached": 2, # Could be legitimate, lower score
+            "overdue payment": 3,
+            "payment failed": 3,
+            "update billing information": 3,
+            "click here": 2,
+            "confirm your password": 4,
+            "reset your account": 3,
+            "open attachment": 2, # Could be legitimate, lower score
+            "review the document": 1, # Very common, low score
+            "exclusive offer": 1,
+            "free gift": 3,
+            "limited time only": 2
             "verify account": 4,
             "security alert": 3,
             "dear customer": 1,
