@@ -4,14 +4,14 @@ This project is a simple phishing email detector that utilizes a keyword-based a
 
 ## Features
 
-* imple User Interface: Built using Streamlit, providing an easy-to-use web application.
-* Keyword Analysis: etects phishing attempts by identifying a predefined list of suspicious keywords within the email content.
+* Simple User Interface: Built using Streamlit, providing an easy-to-use web application.
+* Keyword Analysis: Detects phishing attempts by identifying a predefined list of suspicious keywords within the email content.
 * Clear Verdict: Provides a straightforward "Phishing" or "Safe" classification.
 * Keyword Explanation: When an email is flagged as potential phishing, the application displays the keywords that triggered the classification.
 
 ## How to Use
 
-1.  Ensure you have Python installed on your system.
+1.  Ensure you have Python and streamlit installed on your system.
 2.  Install the necessary library:
     ```bash
     pip install streamlit
@@ -42,4 +42,4 @@ Potential future improvements could include:
 
 ## Author
 
-Ibikunle Michael/Mickeyoyo
+Mickeyoyo
