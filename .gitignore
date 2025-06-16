@@ -1,1 +1,63 @@
-__pycache__/
+# .gitignore
+import streamlit as st
+import re
+
+st.title("AI-Powered Phishing Email Detector (Keyword Based)")
+email_content = st.text_area("Paste the email content here:")
+
+if st.button("Check Email"):
+    keywords_with_scores = {
+        "urgent action required": 5,
+        "your account will be suspended": 5,
+        "immediate response needed": 4,
+        "act now": 3,
+        "verify your identity": 4,
+        "security alert": 3,
+        "account compromised": 5,
+        "unauthorized login attempt": 4,
+        "you have won": 5,
+        "claim your prize": 4,
+        "refund available": 3,
+        "invoice attached": 2, # Could be legitimate, lower score
+        "overdue payment": 3,
+        "payment failed": 3,
+        "update billing information": 3,
+        "click here": 2,
+        "confirm your password": 4,
+        "reset your account": 3,
+        "open attachment": 2, # Could be legitimate, lower score
+        "review the document": 1, # Very common, low score
+        "exclusive offer": 1,
+        "free gift": 3,
+        "limited time only": 2,
+        "verify account": 4,
+        "security alert": 3,
+        "dear customer": 1,
+        "prize": 4, # Add more keywords and their scores
+    }
+    email_content_lower = email_content.lower()
+    total_score = 0
+    found_keywords = []
+    phishing_threshold = 5 # Set a threshold for phishing detection
+
+    for keyword, score in keywords_with_scores.items():
+        if re.search(r'\b' + re.escape(keyword) + r'\b', email_content_lower):
+            total_score += score
+            found_keywords.append(keyword)
+
+    if total_score >= phishing_threshold:
+        st.error("⚠️ POTENTIAL PHISHING EMAIL DETECTED!")
+        st.write("This email has been flagged as suspicious due to the presence of the following indicators:")
+        if found_keywords:
+            st.markdown(f"- **Keywords:** {', '.join(found_keywords)}")
+        st.write(f"**Suspicious Score:** {total_score} (Threshold: {phishing_threshold})")
+        st.warning("Be cautious and avoid clicking links or providing personal information.")
+    else:
+        st.success("✅ This email appears safe based on keyword analysis.")
+        st.write(f"Found {len(found_keywords)} common keywords.")
+        if found_keywords:
+            st.info(f"Note: The following common keywords were found: {', '.join(found_keywords)}. This doesn't necessarily mean it's phishing, but exercise caution.")
+
+st.markdown("---")
+st.markdown("*Disclaimer: This is a basic phishing detector based on keyword analysis and may not catch all sophisticated phishing attempts. Always exercise caution when interacting with emails from unknown senders.*")
+>>>>>>> 92576b846adddcab80d59a4ed3040e7e55bb611f
