@@ -1,45 +1,62 @@
-# AI-Powered Phishing Email Detector (Keyword Based)
+AI-Powered Phishing Email Detector (Keyword + Sender Parsing)
+This project is a phishing email detector that uses both keyword analysis and sender context validation to identify potentially malicious emails. Users paste the content of an email into a simple web interface, and the app analyzes it for suspicious keywords and attempts to parse the sender address to spot spoofing or domain tricks.
 
-This project is a simple phishing email detector that utilizes a keyword-based approach to identify potentially malicious emails. Users can paste the content of an email into a web interface, and the application analyzes it for the presence of common phishing keywords and phrases.
+🔍 Features
+Simple User Interface: Built using Streamlit, providing an intuitive web experience.
 
-## Features
+Keyword Analysis: Scans for a predefined list of common phishing phrases and urgency-based triggers.
 
-* Simple User Interface: Built using Streamlit, providing an easy-to-use web application.
-* Keyword Analysis: Detects phishing attempts by identifying a predefined list of suspicious keywords within the email content.
-* Clear Verdict: Provides a straightforward "Phishing" or "Safe" classification.
-* Keyword Explanation: When an email is flagged as potential phishing, the application displays the keywords that triggered the classification.
+Sender Parsing & Validation: Extracts and inspects the sender's email address to detect suspicious domains or mismatches.
 
-## How to Use
+Social Engineering Pattern Detection: Flags generic greetings, urgency without context, and spoofed brand names.
 
-1.  Ensure you have Python and streamlit installed on your system.
-2.  Install the necessary library:
-    ```bash
-    pip install streamlit
-    ```
-3.  Save the Python script (`phishing_detector.py`) to your local machine.
-4.  Open your command prompt or terminal, navigate to the directory where you saved the file, and run:
-    ```bash
-    streamlit run phishing_detector.py
-    ```
-5.  A web browser will open with the application. Paste the email content you want to check into the text area and click "Check Email."
+Clear Verdict: Delivers a straightforward "Potential Phishing" or "Appears Safe" result.
 
-## Limitations
+Detailed Feedback: Lists keywords found and issues with sender identity or structure.
 
-This is a basic implementation that relies solely on keyword detection. It has the following limitations:
+🚀 How to Use
+Ensure you have Python and Streamlit installed.
 
-* Not foolproof: Sophisticated phishing emails may not contain obvious keywords.
-* False positives: Legitimate emails might contain some of the flagged keywords.
-* Lack of advanced analysis: Does not perform link analysis, header inspection, or other more advanced phishing detection techniques.
+Install required libraries:
 
-## Future Enhancements
+bash
+Copy
+Edit
+pip install streamlit
+Save the Python script (phishing_detector.py) locally.
 
-Potential future improvements could include:
+Open a terminal, navigate to the script location, and run:
 
-* Implementing more sophisticated techniques like machine learning or using the OpenAI API for content analysis.
-* Adding link analysis to check for suspicious URLs.
-* Improving the keyword list and scoring mechanism.
-* Providing more detailed explanations of why an email might be suspicious.
+bash
+Copy
+Edit
+streamlit run phishing_detector.py
+In the web browser that opens:
 
-## Author
+Paste the full email content (including the "From" line if available).
 
+Click “Check Email.”
+
+Review the verdict and indicators returned by the app.
+
+⚠️ Limitations
+While improved, this detector is still a lightweight tool and has these limitations:
+
+Not foolproof: May miss more advanced or stealthy phishing attacks.
+
+False positives: Legitimate emails might trigger certain keywords or patterns.
+
+Limited parsing: Only basic sender validation is done; no full header analysis or attachment/link inspection.
+
+🔧 Future Enhancements
+Integration of full email header parsing (Reply-To, DKIM, SPF checks).
+
+Addition of attachment/link analysis and threat intelligence integration.
+
+Machine learning or NLP-based email classification.
+
+A feedback system to improve detection accuracy over time.
+
+👤 Author
 Mickeyoyo
+
