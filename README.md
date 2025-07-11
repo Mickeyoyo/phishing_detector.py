@@ -40,6 +40,12 @@ Potential future improvements could include:
 * Improving the keyword list and scoring mechanism.
 * Providing more detailed explanations of why an email might be suspicious.
 
+### 🔄 Latest Update
+- Integrated [VirusTotal API](https://virustotal.com) to scan URLs
+- Now detects malicious links in phishing emails
+- Improved keyword + sender + link analysis for smarter results
+
+
 ## Author
 
 Mickeyoyo
