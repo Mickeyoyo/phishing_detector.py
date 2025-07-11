@@ -1,12 +1,41 @@
 import streamlit as st
 import re
+import requests
+import base64
 from email import policy
 from email.parser import BytesParser
 
-st.title("AI-Powered Phishing Email Detector (Enhanced)")
-email_content = st.text_area("Paste the email content here:")
+# === VirusTotal Setup ===
+API_KEY = "YOURAPIKEYHERE"  # <-- Replace this with your actual API key
+HEADERS = {"x-apikey": API_KEY}
 
-if st.button("Check Email"):
+def extract_urls(text):
+    url_pattern = r'(https?://[^\s"\'<>]+)'
+    return re.findall(url_pattern, text)
+
+def scan_url_virustotal(url):
+    try:
+        url_id = base64.urlsafe_b64encode(url.encode()).decode().strip("=")
+        response = requests.get(
+            f"https://www.virustotal.com/api/v3/urls/{url_id}",
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            stats = response.json()['data']['attributes']['last_analysis_stats']
+            malicious = stats.get("malicious", 0)
+            suspicious = stats.get("suspicious", 0)
+            return malicious + suspicious
+        else:
+            return -1
+    except Exception as e:
+        return -1
+
+# === Streamlit App ===
+st.title("🛡️ AI-Powered Phishing Email Detector (with VirusTotal URL Scan)")
+
+email_content = st.text_area("📥 Paste the email content here:", height=300)
+
+if st.button("🔍 Check Email"):
     keywords_with_scores = {
         "urgent action required": 5,
         "your account will be suspended": 5,
@@ -36,79 +65,86 @@ if st.button("Check Email"):
         "prize": 4,
     }
 
-    # Initialize variables
     email_content_lower = email_content.lower()
     total_score = 0
     found_keywords = []
-    phishing_threshold = 5
     sender_issues = []
+    vt_malicious_urls = []
 
-    # Step 1: Parse email to extract sender details
+    phishing_threshold = 5  # You can Adjust if needed
+
+    # Step 1: Parse sender details
     try:
         email_message = BytesParser(policy=policy.default).parsebytes(email_content.encode())
         sender_email = email_message.get('From', '')
-        
-        # Extract email address from "From" field (e.g., "M&S Support <support@marks-spencer.co>")
         email_match = re.search(r'<(.+?)>|(\S+@\S+\.\S+)', sender_email)
         sender_address = email_match.group(1) or email_match.group(2) if email_match else ''
         
-        # Step 2: Validate sender domain
         if sender_address:
             sender_domain = sender_address.split('@')[-1].lower()
-            # List of known legitimate domains (manually curated, free)
-            legitimate_domains = ['marksandspencer.co.uk', 'marksandspencer.com']  # Add more as needed
-            # Check for domain mismatch or suspicious patterns
+            legitimate_domains = ['marksandspencer.co.uk', 'marksandspencer.com']
             if sender_domain not in legitimate_domains:
-                # Check for common phishing domain tricks (e.g., misspellings)
-                if any(re.search(r'marks.*spencer.*\.(co|org|net)', sender_domain)):
-                    sender_issues.append(f"Suspicious domain: {sender_domain} (possible misspelling or fake domain)")
+                if re.search(r'marks.*spencer.*\.(co|org|net)', sender_domain):
+                    sender_issues.append(f"Suspicious domain: {sender_domain} (possible typo or fake)")
                     total_score += 3
                 else:
-                    sender_issues.append(f"Unknown domain: {sender_domain} (not a known M&S domain)")
+                    sender_issues.append(f"Unknown domain: {sender_domain}")
                     total_score += 2
 
-        # Step 3: Check for social engineering patterns
-        # Mismatched sender name and email domain
         sender_name = sender_email.split('<')[0].strip() if '<' in sender_email else ''
         if sender_name and sender_address:
             if "M&S" in sender_name and "marksandspencer" not in sender_domain:
-                sender_issues.append("Sender name claims to be M&S, but email domain doesn’t match")
+                sender_issues.append("Sender name says 'M&S' but domain doesn’t match")
                 total_score += 3
 
-        # Generic greeting without personalization
         if re.search(r'\b(dear (customer|user|member))\b', email_content_lower):
-            sender_issues.append("Generic greeting ('Dear Customer') without personalization")
-            total_score += 1 \
+            sender_issues.append("Generic greeting ('Dear Customer')")
+            total_score += 1
 
-        # Urgency without specifics
         if re.search(r'\b(urgent|immediate|act now)\b', email_content_lower) and not re.search(r'\b(order|account) number\b', email_content_lower):
-            sender_issues.append("Urgent call to action without specific details (e.g., no order number)")
+            sender_issues.append("Urgency without specific details")
             total_score += 2
 
     except Exception as e:
         st.warning(f"Error parsing email: {e}")
 
-    # Step 4: Existing keyword analysis
+    # Step 2: Keyword Matching
     for keyword, score in keywords_with_scores.items():
         if re.search(r'\b' + re.escape(keyword) + r'\b', email_content_lower):
             total_score += score
             found_keywords.append(keyword)
 
-    # Step 5: Output results
+    # Step 3: Extract & Scan URLs
+    urls_found = extract_urls(email_content)
+    for url in urls_found:
+        result = scan_url_virustotal(url)
+        if result > 0:
+            vt_malicious_urls.append((url, result))
+            total_score += 3
+
+    # Step 4: Display results
     if total_score >= phishing_threshold:
         st.error("⚠️ POTENTIAL PHISHING EMAIL DETECTED!")
-        st.write("This email has been flagged as suspicious due to the following indicators:")
+        st.write("This email has been flagged due to the following indicators:")
+
         if found_keywords:
             st.markdown(f"- **Keywords:** {', '.join(found_keywords)}")
         if sender_issues:
-            st.markdown(f"- **Sender/Context Issues:** {', '.join(sender_issues)}")
-        st.write(f"**Suspicious Score:** {total_score} (Threshold: {phishing_threshold})")
-        st.warning("Be cautious and avoid clicking links or providing personal information.")
+            st.markdown(f"- **Sender/Domain Issues:** {', '.join(sender_issues)}")
+        if vt_malicious_urls:
+            st.markdown("### 🧪 Malicious URLs Detected via VirusTotal")
+            for url, engines in vt_malicious_urls:
+                st.error(f"- `{url}` was flagged by {engines} engine(s)")
     else:
-        st.success("✅ This email appears safe based on keyword and context analysis.")
-        st.write(f"Found {len(found_keywords)} common keywords.")
+        st.success("✅ This email appears safe based on current analysis.")
+        st.write(f"Keywords found: {len(found_keywords)}")
         if found_keywords or sender_issues:
-            st.info(f"Note: The following were found: Keywords - {', '.join(found_keywords) if found_keywords else 'None'}; Sender/Context Issues - {', '.join(sender_issues) if sender_issues else 'None'}. Exercise caution.")
+            st.info(f"Note: Found keywords - {', '.join(found_keywords)} | Sender issues - {', '.join(sender_issues)}")
+
+    if urls_found:
+        st.markdown("## 🔗 URLs Found:")
+        for url in urls_found:
+            st.code(url)
 
 st.markdown("---")
-st.markdown("*Disclaimer: This is a basic phishing detector and may not catch all sophisticated phishing attempts. Always exercise caution with emails from unknown senders.*")
+st.markdown("*Disclaimer: This is a basic phishing detector enhanced with VirusTotal. Always verify emails manually when in doubt.*")
